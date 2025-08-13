@@ -34,14 +34,12 @@ function TaskList() {
   const [filter, setFilter] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
 
-  // Problem 1: Fetching on every render
   useEffect(() => {
     fetch('http://localhost:8080/tasks')
       .then(res => res.json())
       .then(data => setTasks(data));
   });
 
-  // Problem 2: Creating new function every render
   const deleteTask = (id) => {
     fetch(`http://localhost:8080/tasks/${id}`, { method: 'DELETE' })
       .then(() => {
@@ -49,7 +47,6 @@ function TaskList() {
       });
   };
 
-  // Problem 3: Filtering in render without memoization
   const filteredTasks = tasks.filter(task => {
     console.log('Filtering...'); // This logs way too often
     const matchesFilter = filter === 'all' || 
@@ -77,7 +74,6 @@ function TaskList() {
       </select>
 
       {filteredTasks.map(task => (
-        // Problem 4: Using index as key would be wrong, but also missing key
         <TaskItem 
           task={task} 
           onDelete={deleteTask}
@@ -89,7 +85,6 @@ function TaskList() {
   );
 }
 
-// Problem 6: Component not memoized
 function TaskItem({ task, onDelete, style }) {
   console.log('TaskItem rendering:', task.id);
   
