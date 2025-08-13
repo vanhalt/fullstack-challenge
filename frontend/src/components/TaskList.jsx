@@ -1,5 +1,7 @@
 // TaskList.jsx - This component has multiple performance issues
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
+
+const taskItemStyle = { padding: '10px', margin: '5px' };
 
 export function TaskList() {
   const [tasks, setTasks] = useState([]);
@@ -10,26 +12,28 @@ export function TaskList() {
     fetch('http://localhost:8080/tasks')
       .then(res => res.json())
       .then(data => setTasks(data));
-  });
+  }, []);
 
-  const deleteTask = (id) => {
+  const deleteTask = useCallback((id) => {
     fetch(`http://localhost:8080/tasks/${id}`, { method: 'DELETE' })
       .then(() => {
-        setTasks(tasks.filter(t => t.id !== id));
+        setTasks(prevTasks => prevTasks.filter(t => t.id !== id));
       });
-  };
+  }, []);
 
-  const filteredTasks = tasks.filter(task => {
-    console.log('Filtering...'); // This logs way too often
-    const matchesFilter = filter === 'all' || 
-      (filter === 'completed' && task.completed) ||
-      (filter === 'pending' && !task.completed);
-    
-    const matchesSearch = task.title.toLowerCase()
-      .includes(searchTerm.toLowerCase());
-    
-    return matchesFilter && matchesSearch;
-  });
+  const filteredTasks = useMemo(() => {
+    console.log('Filtering...');
+    return tasks.filter(task => {
+      const matchesFilter = filter === 'all' ||
+        (filter === 'completed' && task.completed) ||
+        (filter === 'pending' && !task.completed);
+
+      const matchesSearch = task.title.toLowerCase()
+        .includes(searchTerm.toLowerCase());
+
+      return matchesFilter && matchesSearch;
+    });
+  }, [tasks, filter, searchTerm]);
 
   return (
     <div>
@@ -47,17 +51,17 @@ export function TaskList() {
 
       {filteredTasks.map(task => (
         <TaskItem 
+          key={task.id}
           task={task} 
           onDelete={deleteTask}
-          // Problem 5: Creating new object as prop
-          style={{ padding: '10px', margin: '5px' }}
+          style={taskItemStyle}
         />
       ))}
     </div>
   );
 }
 
-export function TaskItem({ task, onDelete, style }) {
+export const TaskItem = React.memo(function TaskItem({ task, onDelete, style }) {
   console.log('TaskItem rendering:', task.id);
   
   return (
@@ -67,4 +71,4 @@ export function TaskItem({ task, onDelete, style }) {
       <button onClick={() => onDelete(task.id)}>Delete</button>
     </div>
   );
-}
+});
