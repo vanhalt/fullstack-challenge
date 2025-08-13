@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
+	gorillaHandlers "github.com/gorilla/handlers"
 )
 
 // In-memory data store
@@ -152,4 +153,25 @@ func CreateTaskForTest(task models.Task) models.Task {
 	task.CreatedAt = time.Now()
 	tasks[task.ID] = task
 	return task
+}
+
+
+func CreateCORSHandler() func(http.Handler) http.Handler {
+
+	// --- CORS Configuration ---
+	// Define the allowed origins. You can use "*" for public APIs,
+	// but it's better to be specific for security.
+	allowedOrigins := gorillaHandlers.AllowedOrigins([]string{"*"})
+
+	// Define the allowed HTTP methods
+	allowedMethods := gorillaHandlers.AllowedMethods([]string{"GET", "POST", "PUT", "DELETE", "OPTIONS"})
+
+	// Define the allowed headers
+	allowedHeaders := gorillaHandlers.AllowedHeaders([]string{"X-Requested-With", "Content-Type", "Authorization"})
+	
+	// Optional: Allow credentials, such as cookies, to be sent
+	allowCredentials := gorillaHandlers.AllowCredentials()
+
+	// Create the CORS handler with our options
+	return gorillaHandlers.CORS(allowedOrigins, allowedMethods, allowedHeaders, allowCredentials)
 }

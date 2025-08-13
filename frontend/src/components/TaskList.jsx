@@ -9,7 +9,7 @@ export function TaskList() {
   const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
-    fetch('http://localhost:8080/tasks')
+    fetch('http://localhost:3001/tasks')
       .then(res => res.json())
       .then(data => setTasks(data));
   }, []);
